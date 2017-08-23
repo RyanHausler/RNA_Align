@@ -3,7 +3,7 @@ biocLite("DECIPHER")
 
 library('DECIPHER')
 
-ls <- list.files("~/Wright/Seeds/") # use all files
+ls <- list.files("~/Desktop/RNA/Seeds/") # use all files
 k <- which(ls=="RF00005.fa") # use a single file
 
 # Input values
@@ -15,7 +15,7 @@ lambda <- 0
 coeff <- 1
 Beta <- 0
 
-rna <- readRNAStringSet(paste0("~/Wright/Seeds/", ls[1]))
+rna <- readRNAStringSet(paste0("~/Desktop/RNA/Seeds/", ls[1]))
 
 #####################################################
 ## Calculate sequence weights
