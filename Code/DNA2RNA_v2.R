@@ -2,12 +2,9 @@
 
 library(DECIPHER)
 
-p_dna  <- readLines("~/Desktop/NS.fasta") # FASTA is 5' DNA
-p_rna  <- gsub(pattern = "T", replace = "U", x = p_dna) # Change to 5' RNA
-writeLines(p_rna, con="~/Desktop/NS_RNA.fasta") # Write out to new file
-p_rna = readRNAStringSet('~/Desktop/NS_RNA.fasta') # Read in RNA FASTA
+p_dna  <- readDNAStringSet("~/Desktop/Segments/PB2.fasta") # FASTA is 5' DNA
+p_rna = RNAStringSet(p_dna) # Read in RNA FASTA
 n_rna = reverseComplement(p_rna) # Change to 3' RNA
-
                       # I can't align more than 5000 seqs due to 'STACK OVERFLOW ERROR'
 align = AlignSeqs(n_rna[1:5000], processors = 4) # Align 3' RNA strands
 
@@ -19,8 +16,8 @@ cutoffs <- sort(unique(c(seq(0, 1, 0.01),
 dimnames(d) <- NULL
 # Clusters similar seqs
 suppressWarnings(guideTree <- IdClusters(d,
-                                         method="UPGMA",
-                                         cutoff=cutoffs,
+                                         method="inexact",
+                                         cutoff=.01,            # Pattern must be RNAStringSet
                                          verbose=FALSE))
 guideTree <- guideTree
 lastSplit <- numeric(dim(guideTree)[1])
@@ -47,5 +44,5 @@ weights <- weights + lastSplit
 weights <- ifelse(weights==0, 1, weights)
 weights <- weights/mean(weights)
 
-states = PredictDBN(align, processors = 4, weight = weights)
-save(states, file='~/Desktop/NS_states.RData')
+states = PredictDBN(align, processors = 4, weight = weights, pseudo = 3)
+save(states, file='~/Desktop/PB2_states.RData')
