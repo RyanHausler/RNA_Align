@@ -3,7 +3,7 @@
 library(DECIPHER)
 
 p_dna  <- readLines("~/Desktop/NS.fasta") # FASTA is 5' DNA
-p_rna  <- gsub(pattern = "T", replace = "U", x = p_dna) # Change to RNA
+p_rna  <- gsub(pattern = "T", replace = "U", x = p_dna) # Change to 5' RNA
 writeLines(p_rna, con="~/Desktop/NS_RNA.fasta") # Write out to new file
 p_rna = readRNAStringSet('~/Desktop/NS_RNA.fasta') # Read in RNA FASTA
 n_rna = reverseComplement(p_rna) # Change to 3' RNA
