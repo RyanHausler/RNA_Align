@@ -3,9 +3,11 @@
 
 library('DECIPHER')
 
-rna_seg1 = readRNAStringSet("~Desktop/")
+rna_seg1 = readRNAStringSet("~Desktop/Segments/")
+rna_seg2 = readRNAStringSet("~/Desktop/Segments/")
 
-rna_seg2 = readRNAStringSet("~/Desktop/")
+align1 = AlignSeqs(rna_seg1[1:5000], processors = 4)
+align2 = AlignSeqs(rna_seg2[1:5000], processors = 4)
 
 # Input values
 thresh <- 0.3
@@ -21,7 +23,7 @@ Beta <- 0
 #####################################################
 
 # get weights (normally would be supplied)
-d <- DistanceMatrix(rna_seg1, verbose=FALSE, includeTerminalGaps=TRUE)    # How dissimilar is on seq from another?
+d <- DistanceMatrix(align1, verbose=FALSE, includeTerminalGaps=TRUE)    # How dissimilar is on seq from another?
 cutoffs <- sort(unique(c(seq(0, 1, 0.01),
                          round(quantile(d, seq(0, 1, 0.01), na.rm=TRUE), 5))))
 dimnames(d) <- NULL
@@ -63,7 +65,7 @@ weights <- weights/mean(weights)
 
 ################################################################# Need weights for each segment individually
 
-d <- DistanceMatrix(rna_seg2, verbose=FALSE, includeTerminalGaps=TRUE)    # How dissimilar is on seq from another?
+d <- DistanceMatrix(align2, verbose=FALSE, includeTerminalGaps=TRUE)    # How dissimilar is on seq from another?
 cutoffs <- sort(unique(c(seq(0, 1, 0.01),
                          round(quantile(d, seq(0, 1, 0.01), na.rm=TRUE), 5))))
 dimnames(d) <- NULL
