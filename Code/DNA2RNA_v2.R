@@ -1,17 +1,15 @@
 # This function changes 5' DNA to 3' RNA in order to study H1N1 secondary structure
-
 library(DECIPHER)
 
-p_dna  <- readDNAStringSet("~/Desktop/Segments/PA.fasta") # FASTA is 5' DNA
+p_dna  <- readDNAStringSet("~/Desktop/Segments/NA.fasta") # FASTA is 5' DNA
 p_rna = RNAStringSet(p_dna) # Read in RNA FASTA
 n_rna = reverseComplement(p_rna) # Change to 3' RNA
                       # I can't align more than 5000 seqs due to 'STACK OVERFLOW ERROR'
 align = AlignSeqs(n_rna[1:5000], processors = 4) # Align 3' RNA strands
-ref = readDNAStringSet("~/Desktop/Segments/PA_Correct.fasta")
+ref = readDNAStringSet("~/Desktop/Segments/NA_Correct.fasta")
 ref_rna = RNAStringSet(ref)
 
 full_align = AlignProfiles(ref_rna, align)
-BrowseSeqs(full_align)
 
 # Get weights for PredictDBN
 # get weights (normally would be supplied)
@@ -53,9 +51,12 @@ weights <- weights/mean(weights)
 x = which(weights > (mean(weights) + 3*sd(weights)))
 weights[x] = 20
 weights = weights/mean(weights)
-save(full_align, file = '~/Desktop/Alignment/PA_align.RData')
+
+writeXStringSet(full_align, file='~/Desktop/NA_align.txt')
+# readRNAStringSet()
+
 
 states = PredictDBN(full_align, processors = 4, weight = weights, pseudo = 3)
-cat(pairs, file='~/Desktop/Predictions/PA_states.txt')
+write(states, file='~/Desktop/PB1_states.txt')
 pairs = PredictDBN(full_align, type='pairs', processors = 4, weight = weights, pseudo = 3)
-save(pairs, file='~/Desktop/Predictions/PA_pairs.RData')
+write.table(pairs, file='~/Desktop/PB1_pairs.txt')
