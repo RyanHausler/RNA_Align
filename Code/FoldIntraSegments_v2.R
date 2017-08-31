@@ -1,33 +1,17 @@
 library(DECIPHER)
 
-dna <- readDNAStringSet("~/Library/Containers/com.apple.TextEdit/Data/Downloads/GenomicFastaResults.fasta")
+dna <- readDNAStringSet("~/Desktop/full_PB2.fasta")
+cds <- readDNAStringSet('~/Desktop/cds_PB2.fasta')
 
-cds <- readDNAStringSet("~/Downloads/CdsFastaResults.fasta")
-
-clusters <- IdClusters(myXStringSet=subseq(cds, 1, 200),
+x = seq(1, length(dna), 10)
+clusters <- IdClusters(myXStringSet=dna[x],
 	method="inexact",
-	cutoff=c(0.01, 0.02, 0.04, 0.08))
+	cutoff=c(0.01))
 a <- apply(clusters, 2, function(x) length(unique(x))) # choose a cutoff
 reps <- which(!duplicated(clusters[, 1]))
 dna <- dna[reps]
-cds <- cds[reps]
 
-starts <- ends <- integer(length(dna))
-
-for (i in seq_along(dna)) {
-	v <- matchPattern(cds[[i]], dna[[i]])
-	starts[i] <- start(v)
-	ends[i] <- end(v)
-}
-
-region1 <- subseq(dna, 1, starts - 1)
-region3 <- subseq(dna, ends + 1, width(dna))
-
-region1 <- AlignSeqs(region1, terminalGap=c(-5, -1000))
-cds <- AlignTranslation(cds)
-region3 <- AlignSeqs(region3, terminalGap=c(-1000, -5))
-
-align <- xscat(region1, cds, region3)
+align <- AlignTranslation(dna)
 
 d <- DistanceMatrix(align, verbose=FALSE, includeTerminalGaps=TRUE)
 cutoffs <- sort(unique(c(seq(0, 1, 0.01),
@@ -64,8 +48,17 @@ weights <- ifelse(weights==0, 1, weights)
 weights <- weights/mean(weights)
 
 # down-weight outlier weights
+x = which(weights > (mean(weights) + 3*sd(weights)))
+weights[x] = 20
+weights = weights/mean(weights)
 
-p <- PredictDBN(align, type="pairs", processors=8, pseudoknots=3)
+writeXStringSet(align, file='~/Desktop/PB2_align.txt')
+
+states = PredictDBN(align, processors = 4, weight = weights, pseudo = 3)
+write(states, file='~/Desktop/PB2_states.txt')
+pairs = PredictDBN(align, type='pairs', processors = 4, weight = weights, pseudo = 3)
+write.table(pairs, file='~/Desktop/PB2_pairs.txt')
+
 
 # visualize
 
